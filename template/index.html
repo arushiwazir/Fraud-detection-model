@@ -1,1 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fraud Detection — Prediction Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Fraud Detection Prediction Tool</h1>
+        <p class="subtitle">
+            Enter transaction and account details below to estimate the probability
+            that a transaction is fraudulent, based on a Random Forest model trained
+            on simulated card transaction data.
+        </p>
 
+        {% if errors %}
+        <div class="alert-box">
+            <ul>
+                {% for e in errors %}
+                <li>{{ e }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/predict">
+            {% for feat in features %}
+                {% set info = feature_info[feat] %}
+                <div class="form-group">
+                    <label for="{{ feat }}">{{ info.label }}</label>
+                    <input
+                        type="number"
+                        step="{{ info.step }}"
+                        name="{{ feat }}"
+                        id="{{ feat }}"
+                        value="{{ submitted_values[feat] if submitted_values else info.default }}"
+                        required
+                    >
+                    <p class="help-text">{{ info.help }}</p>
+                </div>
+            {% endfor %}
+
+            <button type="submit">Predict Fraud Probability</button>
+        </form>
+
+        {% if result %}
+        <div class="result-box risk-{{ result.risk_level }}">
+            <h2>Predicted Fraud Probability: {{ result.percent }}%</h2>
+            <p>
+                Risk level:
+                <strong>
+                    {% if result.risk_level == "low" %}Low
+                    {% elif result.risk_level == "medium" %}Medium
+                    {% else %}High
+                    {% endif %}
+                </strong>
+            </p>
+        </div>
+        {% endif %}
+
+        <footer>
+            <p>Model: Random Forest (trained on simulated transaction data) &mdash;
+               for demonstration purposes only.</p>
+        </footer>
+    </div>
+</body>
+</html>
